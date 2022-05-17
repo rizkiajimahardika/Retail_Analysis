@@ -1,0 +1,191 @@
+---
+title: "Retail Analysis PT.Vards"
+author: "Rizki Aji Mahardika"
+date: "4/29/2022"
+output: 
+  html_document :
+    number_sections: true
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+    df_print: paged
+    theme: united
+    highlight: breezedark
+  pdf_document:
+    latex_engine: xelatex
+---
+# Explanation
+In this project, I will use data from retail.csv to do exploratory data analysis. This data contains sales records from a retail company which I named PT. Vards. PT.Vards is a global retail company selling Office Supplies, Furniture and Technology stuff. The buyers come from various segments such as Corporate, Home Office, and individual consumers. This company can also provide the best options for customer delivery according to customer needs.
+
+## Input Data
+First, we need to read data
+
+```{r}
+vards <- read.csv("data_input/retail.csv")
+```
+Next, we want to see top 10 data owned by PT.Vards
+
+```{r}
+head(vards,10)
+```
+Then, we want to dimension of data
+```{r}
+dim(vards)
+```
+this data contains 9994 rows and 15 columns
+
+
+# Data Cleansing
+The first step in conducting data analysis is to ensure that the data to be used is clean. The initial stage we do is check data type for each column in the data
+
+```{r cars}
+str(vards)
+```
+Based on data type for each column above, there is an incorrect data type. Therefore, we have to change the data type
+
+## Explicit Coercion
+
+```{r}
+vards$Order.Date <- as.Date(vards$Order.Date, format = "%m/%d/%y")
+vards$Ship.Date <- as.Date(vards$Ship.Date, format = "%m/%d/%y")
+vards$Ship.Mode <- as.factor(vards$Ship.Mode)
+vards$Segment <- as.factor(vards$Segment)
+vards$Category <- as.factor(vards$Category)
+vards$Sub.Category <- as.factor(vards$Sub.Category)
+```
+
+and we recheck the data type again
+
+```{r}
+str(vards)
+```
+Now the data type is in accordance with each column
+
+## Check Missing Values
+
+```{r}
+anyNA(vards)
+```
+```{r}
+colSums(is.na(vards))
+```
+Great! We don't have missing values.
+
+## Finishing Data Cleansing
+Next step, we want to retrieve the data needed to perform data analysis, i.e. data from columns 3-15, because we don't need Row.ID and Order.ID columns
+
+```{r}
+vards <- vards[,3:15]
+head(vards)
+```
+finally, we finish doing data cleansing
+
+# Data Explanation
+```{r}
+summary(vards)
+```
+1. First order occured in January 2014
+2. Standard class is the most frequently used in ship modestandard class is the most frequently used in ship mode
+3. The segment that buys the most is the consumer segment
+4. The office supplies category is the category most frequently purchased by customers
+5. Sub category other is the most purchased, then followed by binders and paper
+6. PT Vards got the lowest sales value of 0.444 and the highest of 22638.480 and has an average of 229.858
+7. Purchase with the highest quantity, which is 14 quantity
+8. The average discount given by PT Vards is 15.62% and has the highest discount of 80%
+9. PT Vards earned an average profit of 28.657 with the lowest profit being a loss of -6599.978, the highest being a profit of 8399.976
+
+# Data Manipulation & Transformation
+
+1. Which category has the highest sales?
+
+```{r}
+xtabs(Sales~Category,vards)
+```
+** Answer : Technology category has the highest sales **
+
+
+2. How many transactions are sent using Standard Class and First Class?
+
+```{r}
+nrow(vards[vards$Ship.Mode %in% c("Standard Class", "First Class"),])
+```
+** Answer : There are 7506 transactions whose delivery uses Standard Class and First Class **
+
+
+3. Which category has the highest profit?
+
+```{r}
+xtabs(Profit~Category,vards)
+```
+** Answer : Technology category has the highest profit **
+
+
+4. How many transactions from Technology category resulted in a loss(profit less than zero)?
+
+```{r}
+nrow(vards[vards$Category == "Technology" & vards$Profit < 0,])
+```
+** Answer : There are 271 transactions from Technology category that resulted in losses(profit less than zero) **
+
+
+5. What type of shipping does the Corporate segment use the most?
+
+```{r}
+table(vards$Ship.Mode, vards$Segment)
+```
+** Answer : Type of delivery that is most widely used by the corporate segment is standard class **
+
+
+6. What segments and categories have the highest average profit?
+
+```{r}
+profit <- aggregate(Profit~Segment+Category,vards,mean)
+profit[order(profit$Profit,decreasing=T),]
+```
+** Answer : Home Office segment and Technology category have the highest average profit at PT.Vards **
+
+
+7. How much quantity sold in PT.Vards?
+
+```{r}
+sum(vards$Quantity)
+```
+** Answer : There are 37873 sold at PT. Vards **
+
+8. How much total profit PT.Vards get?
+
+```{r}
+sum(vards$Profit)
+```
+** Answer : PT. Vards get a total profit of 286397 **
+
+9. How much total sales PT.Vards get?
+
+```{r}
+sum(vards$Sales)
+```
+** Answer : PT. Vards get a total sales of 2297201 **
+
+
+10. Which category has the most quantity sold?
+
+```{r}
+xtabs(Quantity~Category,vards)
+```
+** Answer : Office supplies category has the most quantity sold **
+
+
+
+# Conclusion and Recommendation
+
+## Conclusion
+
+During 2014 - 2017, PT.Vards had total sales of 2297201 and total profit of 286397 and sold 37873 items. The most sold category is the office supplies category. The type of delivery that is mostly used by customers is standard class. The technology category has the highest number of sales and profits compared to other categories.
+
+The home office segment and technology category had the highest average profit, which was 89.152458. There are 271 transactions from the technology category that have losses. Then 7506 transactions use standard class and first class delivery types.
+
+## Recommendation
+From the conclusion above, the technology category has the highest total sales and total profit compared to other categories. PT. Vards must find out what causes the technology category to have the highest total sales and total profit compared to other categories and find ways to increase the total profit and total sales of other categories.
+
+The same thing happens with the type of delivery. The standard class delivery type is the most widely used type of delivery. PT. Vards must find out what causes standard class shipping types to be more in demand than other types of shipping. If because the price is cheaper, then PT. Vards may perform price reductions on other types of shipping to increase the number of customers using other types of shipping.
